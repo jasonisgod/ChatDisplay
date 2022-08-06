@@ -1,0 +1,37 @@
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<div id="box" style="height:100%; overflow-y: auto">
+    <div id="data" style="bottom:0; overflow-y: auto; position: absolute"></div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString);
+const limit = urlParams.get('limit')
+// console.log(queryString);
+// console.log(limit);
+
+var VID = urlParams.get('vid') || 'PTUafmTYrsA'
+var LIMIT = urlParams.get('limit') || 50
+var POLL = urlParams.get('poll') || 1000
+
+var DOMAIN = 'http://127.0.0.1:9005'
+// var DOMAIN = 'http://jasonisgod.xyz:9005'
+
+function getData() {
+    var url = DOMAIN + '/api/data/' + VID + '/' + LIMIT
+    $.get(url, function(data) {
+        // $( ".result" ).html( data );
+        // alert( "Load was performed." );
+        $("#data").html(data)
+        updateScroll()
+    });
+}
+// getData()
+setInterval(getData, POLL)
+//once a second
+// setInterval(updateScroll,1000);
+function updateScroll(){
+    var element = document.getElementById("data");
+    element.scrollTop = element.scrollHeight;
+}
+</script>
