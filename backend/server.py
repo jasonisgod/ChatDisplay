@@ -9,9 +9,9 @@ def to_html(comment):
     html = f'<span class="author">{comment["author"]}</span> '
     for e in comment['content']:
         if e['type'] == 'text':
-            html += f'<span class="content text">{e["data"]}</span>'
+            html += f'<span class="text">{e["data"]}</span>'
         if e['type'] == 'emoji':
-            html += f'<img src={e["url"]} style="width:16px">'
+            html += f'<img class="emoji" src={e["url"]}>'
     html += ' <br>'
     return html
 

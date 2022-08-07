@@ -11,6 +11,7 @@
             var VID = urlParams.get('vid') || 'PTUafmTYrsA'
             var LIMIT = urlParams.get('limit') || 50
             var POLL = urlParams.get('poll') || 1000
+            var SIZE = urlParams.get('size') || 30
             
             var DOMAIN = 'http://127.0.0.1:9005'
             // var DOMAIN = 'http://jasonisgod.xyz:9005'
@@ -20,6 +21,7 @@
                 $.get(url, function(data) {
                     $("#data").html(data)
                     updateScroll()
+                    updateSize()
                 });
             }
             // getData()
@@ -30,11 +32,18 @@
                 var element = document.getElementById("data")
                 element.scrollTop = element.scrollHeight
             }
+            function updateSize() {
+                $('.author').css('font-size', SIZE + 'px')
+                $('.emoji').css('width', SIZE + 'px')
+                $('.text').css('font-size', SIZE + 'px')
+            }
             </script>
         <style>
             body { background-color: antiquewhite; }
-            .author { color:blue; font-weight: bold; }
             #data { bottom: 0; overflow-y: auto; position: absolute; margin: auto; }
+            .author { color:blue; font-weight: bold; font-size: 30px; }
+            .text { font-size: 30px; }
+            .emoji { width: 30px; }
         </style>
     </head>
     <body>
