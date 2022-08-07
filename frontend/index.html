@@ -2,51 +2,31 @@
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="script.js"></script>
         <script>
-
-            const queryString = window.location.search
-            const urlParams = new URLSearchParams(queryString)
-            const limit = urlParams.get('limit')
-            
-            var VID = urlParams.get('vid') || 'PTUafmTYrsA'
-            var LIMIT = urlParams.get('limit') || 50
-            var POLL = urlParams.get('poll') || 1000
-            var SIZE = urlParams.get('size') || 30
-            
-            var DOMAIN = 'http://127.0.0.1:9005'
-            // var DOMAIN = 'http://jasonisgod.xyz:9005'
-            
-            function getData() {
-                var url = DOMAIN + '/api/data/' + VID + '/' + LIMIT
-                $.get(url, function(data) {
-                    $("#data").html(data)
-                    updateScroll()
-                    updateSize()
-                });
+            function getStart() {
+                var VID = $("#vid").val()
+                var LIMIT = $("#limit").val()
+                var SIZE = $("#size").val()
+                var POLL = $("#poll").val()
+                var DELAY = $("#delay").val()
+                var url = 'backstage.html?vid=' + VID + '&limit=' + LIMIT + '&size=' + SIZE + '&poll=' + POLL + '&delay=' + DELAY
+                window.location.href = url
             }
-            // getData()
-            setInterval(getData, POLL)
-            //once a second
-            // setInterval(updateScroll,1000);
-            function updateScroll(){
-                var element = document.getElementById("data")
-                element.scrollTop = element.scrollHeight
-            }
-            function updateSize() {
-                $('.author').css('font-size', SIZE + 'px')
-                $('.emoji').css('width', SIZE + 'px')
-                $('.text').css('font-size', SIZE + 'px')
-            }
-            </script>
+        </script>
         <style>
             body { background-color: antiquewhite; }
-            #data { bottom: 0; overflow-y: auto; position: absolute; margin: auto; }
-            .author { color:blue; font-weight: bold; font-size: 30px; }
-            .text { font-size: 30px; }
-            .emoji { width: 30px; }
         </style>
     </head>
     <body>
-        <div id="data"></div>
+        VID <input id="vid"> <br>
+        LIMIT <input id="limit" value="20"> <br>
+        POLL <input id="poll" value="500"> <br>
+        SIZE <input id="size" value="24"> <br>
+        DELAY <input id="delay" value="3000"> <br>
+        <button onclick="getStart()">Submit</button>
+        <!-- <a href="backstage.html?vid=qAf7LO_Ve7E&limit=20&size=24&poll=500">Backstage</a> <br>
+        <a href="chatroom.html?vid=qAf7LO_Ve7E&limit=20&size=24&poll=500">Chatroom</a> <br>
+        <span>?vid=qAf7LO_Ve7E&limit=20&size=24&poll=500</span> <br> -->
     </body>
 </html>
