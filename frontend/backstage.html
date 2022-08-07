@@ -1,0 +1,35 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script>
+            
+            var DOMAIN = 'http://127.0.0.1:9005'
+            // var DOMAIN = 'http://jasonisgod.xyz:9005'
+            
+            function sendData() {
+                var url = DOMAIN + '/api/add'
+                var data = {
+                    'author': $('#author').val() || '???',
+                    'content': $('#content').val() || '???'
+                }
+                $.get(url, data)
+                $('#content').val('')
+            }
+
+            $(document).on('keypress', function(e) {
+                if(e.which == 13) {
+                    sendData()
+                }
+            });
+            </script>
+        <style>
+            body { background-color: antiquewhite; }
+        </style>
+    </head>
+    <body>
+        <span>Author</span> <input id="author"> <br>
+        <span>Content</span> <input id="content"> <br>
+        <button onclick="sendData()">Send</button> <br>
+    </body>
+</html>
