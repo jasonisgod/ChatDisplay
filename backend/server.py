@@ -85,6 +85,12 @@ def api_add():
     content = request.args.get('content')
     return str(add_jm_comments(author, content))
 
+@app.route("/api/reset")
+def api_reset():
+    global jm_comments
+    jm_comments = []
+    return str(True)
+
 print(f'HOST={HOST} PORT={PORT}')
 app.run(host=HOST, port=PORT)
 

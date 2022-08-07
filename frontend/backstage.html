@@ -17,6 +17,11 @@
                 $('#content').val('')
             }
 
+            function sendReset() {
+                var url = DOMAIN + '/api/reset'
+                $.get(url)
+            }
+
             $(document).on('keypress', function(e) {
                 if(e.which == 13) {
                     sendData()
@@ -30,6 +35,7 @@
     <body>
         <span>Author</span> <input id="author"> <br>
         <span>Content</span> <input id="content"> <br>
-        <button onclick="sendData()">Send</button> <br>
+        <button onclick="sendData()">Send</button> <br><br>
+        <button onclick="sendReset()">Reset</button> <br>
     </body>
 </html>
