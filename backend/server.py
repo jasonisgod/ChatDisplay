@@ -14,17 +14,13 @@ def now(): return datetime.datetime.now()
 def t2s(t, format="%Y-%m-%d %H:%M:%S"): return t.strftime(format)
 def s2t(s, format="%Y-%m-%d %H:%M:%S"): return datetime.datetime.strptime(s,format)
 
-def to_html(comment):
-    type_ = comment["type"]
-    html = ''
-    html += f'<div class="author author-{type_}">{comment["author"]}</div> '
-    for e in comment['content']:
-        if e['type'] == 'text':
-            html += f'<span class="text text-{type_}">{e["data"]}</span>'
-        if e['type'] == 'emoji':
-            html += f'<img class="emoji emoji-{type_}" src={e["url"]}>'
-    html = f'<div class="comment comment-{type_}">' + html + '</div>'
-    return html
+def new_comment(timestamp, author, content, type_):
+    return {
+        'timestamp': str(timestamp),
+        'author': author, 
+        'content': content, 
+        'type': type_
+    }
 
 def get_yt_comments(vid, limit=30):
     try:
@@ -52,7 +48,7 @@ def get_yt_comments(vid, limit=30):
                     if 'emoji' in run.keys(): 
                         url = run['emoji']['image']['thumbnails'][0]['url']
                         content += [{'type':'emoji','url':url}]
-                comment = {'timestamp': timestamp, 'author': author, 'content': content, 'type': 'public'}
+                comment = new_comment(timestamp, author, content, 'public')
                 comments += [comment]
             except Exception as e:
                 pass
@@ -63,12 +59,7 @@ def get_yt_comments(vid, limit=30):
         return [] #'Error'
 
 def add_jm_comments(author, content, type_):
-    comment = {
-        'timestamp': now(), 
-        'author': author, 
-        'content': [{'type':'text','data':content}],
-        'type': type_
-    }
+    comment = new_comment(now(), author, [{'type':'text','data':content}], type_)
     jm_comments.append(comment)
     return True
 
@@ -88,8 +79,7 @@ def api_data():
         comments = [c for c in comments if c['type'] == 'public']
     comments = sorted(comments, key=lambda c: c['timestamp'])
     comments = comments[-limit:]
-    htmls = [to_html(c) for c in comments]
-    return '\n'.join(htmls)
+    return json.dumps(comments)
 
 @app.route("/api/add")
 def api_add():

@@ -14,11 +14,31 @@ var SIZE = urlParams.get('size') || 30
 var DELAY = urlParams.get('delay') || 0 
 var CONSOLE = urlParams.get('console') || "0" 
 
+function commentsToHtml(comments) {
+    var html = ''
+    comments.forEach(comment => {
+        var type_ = comment.type
+        var tmp = ''
+        tmp += `<div class="author author-${type_}">${comment.author}</div> `
+        comment.content.forEach(e => {
+            if (e.type == 'text')
+            tmp += `<span class="text text-${type_}">${e.data}</span>`
+            if (e.type == 'emoji')
+            tmp += `<img class="emoji emoji-${type_}" src=${e.url}>`
+        })
+        tmp = `<div class="comment comment-${type_}">` + tmp + '</div>'
+        html += tmp
+    })
+    return html
+}
+
 function getData() {
     var url = DOMAIN_BACKEND + '/api/data'
     var data = { 'vid': VID, 'limit': LIMIT, 'console':CONSOLE }
     $.get(url, data, function(res) {
-        $("#chat-box").html(res)
+        var comments = JSON.parse(res)
+        var html = commentsToHtml(comments)
+        $("#chat-box").html(html)
         updateScroll()
         updateSize()
     });
