@@ -15,13 +15,15 @@ def t2s(t, format="%Y-%m-%d %H:%M:%S"): return t.strftime(format)
 def s2t(s, format="%Y-%m-%d %H:%M:%S"): return datetime.datetime.strptime(s,format)
 
 def to_html(comment):
-    html = f'<span class="author">{comment["author"]}</span> '
+    type_ = comment["type"]
+    html = ''
+    html += f'<div class="author author-{type_}">{comment["author"]}</div> '
     for e in comment['content']:
         if e['type'] == 'text':
-            html += f'<span class="text">{e["data"]}</span>'
+            html += f'<span class="text text-{type_}">{e["data"]}</span>'
         if e['type'] == 'emoji':
-            html += f'<img class="emoji" src={e["url"]}>'
-    html += ' <br>'
+            html += f'<img class="emoji emoji-{type_}" src={e["url"]}>'
+    html = f'<div class="comment comment-{type_}">' + html + '</div>'
     return html
 
 def get_yt_comments(vid, limit=30):
@@ -50,7 +52,7 @@ def get_yt_comments(vid, limit=30):
                     if 'emoji' in run.keys(): 
                         url = run['emoji']['image']['thumbnails'][0]['url']
                         content += [{'type':'emoji','url':url}]
-                comment = {'timestamp': timestamp, 'author': author, 'content': content}
+                comment = {'timestamp': timestamp, 'author': author, 'content': content, 'type': 'public'}
                 comments += [comment]
             except Exception as e:
                 pass
@@ -60,8 +62,13 @@ def get_yt_comments(vid, limit=30):
     except Exception as e:
         return [] #'Error'
 
-def add_jm_comments(author, content):
-    comment = {'timestamp': now(), 'author': author, 'content': [{'type':'text','data':content}]}
+def add_jm_comments(author, content, type_):
+    comment = {
+        'timestamp': now(), 
+        'author': author, 
+        'content': [{'type':'text','data':content}],
+        'type': type_
+    }
     jm_comments.append(comment)
     return True
 
@@ -70,10 +77,15 @@ PORT = int(sys.argv[1])
 app = Flask(__name__, template_folder='.')
 CORS(app)
 
-@app.route("/api/data/<vid>/<int:limit>")
-def api_data(vid, limit):
+@app.route("/api/data")
+def api_data():
+    vid = request.args.get('vid')
+    limit = int(request.args.get('limit'))
+    console = request.args.get('console')
     yt_comments = get_yt_comments(vid, limit)
     comments = (yt_comments + jm_comments)
+    if console == '0':
+        comments = [c for c in comments if c['type'] == 'public']
     comments = sorted(comments, key=lambda c: c['timestamp'])
     comments = comments[-limit:]
     htmls = [to_html(c) for c in comments]
@@ -83,7 +95,8 @@ def api_data(vid, limit):
 def api_add():
     author = request.args.get('author')
     content = request.args.get('content')
-    return str(add_jm_comments(author, content))
+    type_ = request.args.get('type')
+    return str(add_jm_comments(author, content, type_))
 
 @app.route("/api/reset")
 def api_reset():

@@ -2,13 +2,29 @@
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
+            :root {
+                --SIZE: 30px;
+            }
             body { background-color: antiquewhite; }
             #console-box { background-color: antiquewhite; margin: auto; padding: 10px; border: 1px solid gray; }
-            #chat-box { bottom: 0; overflow-y: auto; position: absolute; margin: auto; z-index: -1; }
-            #reset-btn { color: red; }
-            .author { color:blue; font-weight: bold; font-size: 30px; }
-            .text { font-size: 30px; }
-            .emoji { width: 30px; }
+            #chat-box { bottom: 0; overflow-y: auto; position: absolute; margin: auto; z-index: -1; width: 100%; }
+            #reset-btn, #reset-span { color: red; }
+            .author {
+                color:blue; font-weight: bold; font-size: var(--SIZE);
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                max-width: 500px;
+                display: inline-block;
+                margin-bottom: -5px;
+            }
+            .text { font-size: var(--SIZE); }
+            .emoji { width: var(--SIZE); }
+            .comment { margin-bottom: 1px; }
+            .comment-private { color:red; background-color: pink; text-align: right; padding-right: 20px; }
+            .author-private { color:red; }
+            .text-private { color:red; }
+            /* .emoji-private { color:gray; } */
         </style>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script src="script.js"></script>
@@ -21,13 +37,14 @@
             var LIMIT = urlParams.get('limit') || 50
             var POLL = urlParams.get('poll') || 1000
             var SIZE = urlParams.get('size') || 30
-            var DELAY = urlParams.get('delay') || 3000 
+            var DELAY = urlParams.get('delay') || 0 
             var CONSOLE = urlParams.get('console') || "0" 
             
             function getData() {
-                var url = DOMAIN_BACKEND + '/api/data/' + VID + '/' + LIMIT
-                $.get(url, function(data) {
-                    $("#chat-box").html(data)
+                var url = DOMAIN_BACKEND + '/api/data'
+                var data = { 'vid': VID, 'limit': LIMIT, 'console':CONSOLE }
+                $.get(url, data, function(res) {
+                    $("#chat-box").html(res)
                     updateScroll()
                     updateSize()
                 });
@@ -39,9 +56,9 @@
             }
 
             function updateSize() {
-                $('.author').css('font-size', SIZE + 'px')
-                $('.emoji').css('width', SIZE + 'px')
-                $('.text').css('font-size', SIZE + 'px')
+                // $('.author').css('font-size', SIZE + 'px')
+                // $('.emoji').css('width', SIZE + 'px')
+                // $('.text').css('font-size', SIZE + 'px')
             }
 
             function getStart() {
@@ -56,14 +73,29 @@
                 window.location.href = url
             }
                         
-            function sendData() {
-                var content = $('#content').val()
-                $('#content').val('')
+            function sendPublicMsg() {
+                var publicMsg = $('#public-msg').val()
+                $('#public-msg').val('')
                 setTimeout(function() {
                     var url = DOMAIN_BACKEND + '/api/add'
                     var data = {
                         'author': $('#author').val() || '???',
-                        'content': content || '???'
+                        'content': publicMsg || '???',
+                        'type': 'public'
+                    }
+                    $.get(url, data)
+                }, DELAY)
+            }
+
+            function sendPrivateMsg() {
+                var privateMsg = $('#private-msg').val()
+                $('#private-msg').val('')
+                setTimeout(function() {
+                    var url = DOMAIN_BACKEND + '/api/add'
+                    var data = {
+                        'author': '',
+                        'content': privateMsg || '???',
+                        'type': 'private'
                     }
                     $.get(url, data)
                 }, DELAY)
@@ -73,17 +105,14 @@
                 var url = DOMAIN_BACKEND + '/api/reset'
                 $.get(url)
                 $('#reset-span').hide();
-                $('#reset-btn').show();
             }
             
             function tryReset() {
                 $('#reset-span').show();
-                $('#reset-btn').hide();
             }
 
             function cancelReset() {
                 $('#reset-span').hide();
-                $('#reset-btn').show();
             }
 
             function copyToClipboard(text) {
@@ -105,7 +134,8 @@
 
             $(document).on('keypress', function(e) {
                 if(e.which == 13 && VID != '') {
-                    sendData()
+                    if ($("#public-msg").is(":focus")) sendPublicMsg()
+                    if ($("#private-msg").is(":focus")) sendPrivateMsg()
                 }
             });
             
@@ -113,6 +143,8 @@
                 if (VID == '') {
                     $('#setup-box').show()
                 } else {
+                    var root = document.querySelector(':root');
+                    root.style.setProperty('--SIZE', SIZE + 'px');
                     setInterval(getData, POLL)
                     $('#chat-box').show()
                     if (CONSOLE == "1") {
@@ -128,11 +160,11 @@
     <body>
 
         <div id="setup-box" style="display:none">
-            VID <input id="vid"> <br>
+            VID <input id="vid"> ZaZnWt6Xs8g <br> 
             LIMIT <input id="limit" value="20"> <br>
             POLL <input id="poll" value="1000"> <br>
             SIZE <input id="size" value="24"> <br>
-            DELAY <input id="delay" value="3000"> <br>
+            DELAY <input id="delay" value="0"> <br>
             CONSOLE <input id="console" value="1"> <br>
             <button onclick="getStart()">Submit</button>
         </div>
@@ -142,14 +174,21 @@
             <input id="url" disabled> 
             <button onclick="copyUrl()">Copy</button> 
             <br>
+            Public Message:
+            <br>
             Author <input id="author" value="亞可"> 
             <br>
-            Content <input id="content" value="好可愛哦~"> 
-            <button onclick="sendData()">Send</button> 
+            Content <input id="public-msg" value="好可愛哦~"> 
+            <button onclick="sendPublicMsg()">Send</button> 
+            <br>
+            Private Message:
+            <br>
+            Content <input id="private-msg" value=""> 
+            <button onclick="sendPrivateMsg()">Send</button> 
             <br>
             <button id='reset-btn' onclick="tryReset()">Reset</button> 
             <span id="reset-span" style="display: none;">
-                Confirm Reset? 
+                Sure? 
                 <button onclick="sendReset()">Yes</button> 
                 <button onclick="cancelReset()">No</button> 
             </span>
