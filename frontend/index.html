@@ -1,32 +1,163 @@
 <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body { background-color: antiquewhite; }
+            #console-box { background-color: antiquewhite; margin: auto; padding: 10px; border: 1px solid gray; }
+            #chat-box { bottom: 0; overflow-y: auto; position: absolute; margin: auto; z-index: -1; }
+            #reset-btn { color: red; }
+            .author { color:blue; font-weight: bold; font-size: 30px; }
+            .text { font-size: 30px; }
+            .emoji { width: 30px; }
+        </style>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script src="script.js"></script>
         <script>
+
+            const queryString = window.location.search
+            const urlParams = new URLSearchParams(queryString)
+            
+            var VID = urlParams.get('vid') || '' //'PTUafmTYrsA'
+            var LIMIT = urlParams.get('limit') || 50
+            var POLL = urlParams.get('poll') || 1000
+            var SIZE = urlParams.get('size') || 30
+            var DELAY = urlParams.get('delay') || 3000 
+            var CONSOLE = urlParams.get('console') || "0" 
+            
+            function getData() {
+                var url = DOMAIN_BACKEND + '/api/data/' + VID + '/' + LIMIT
+                $.get(url, function(data) {
+                    $("#chat-box").html(data)
+                    updateScroll()
+                    updateSize()
+                });
+            }
+            
+            function updateScroll(){
+                var element = $("#chat-box")
+                element.scrollTop = element.scrollHeight
+            }
+
+            function updateSize() {
+                $('.author').css('font-size', SIZE + 'px')
+                $('.emoji').css('width', SIZE + 'px')
+                $('.text').css('font-size', SIZE + 'px')
+            }
+
             function getStart() {
                 var VID = $("#vid").val()
                 var LIMIT = $("#limit").val()
                 var SIZE = $("#size").val()
                 var POLL = $("#poll").val()
                 var DELAY = $("#delay").val()
-                var url = 'backstage.html?vid=' + VID + '&limit=' + LIMIT + '&size=' + SIZE + '&poll=' + POLL + '&delay=' + DELAY
+                var CONSOLE = $("#console").val()
+                var url = 'index.html?vid=' + VID + '&limit=' + 
+                    LIMIT + '&size=' + SIZE + '&poll=' + POLL + '&delay=' + DELAY + '&console=' + CONSOLE
                 window.location.href = url
             }
+                        
+            function sendData() {
+                var content = $('#content').val()
+                $('#content').val('')
+                setTimeout(function() {
+                    var url = DOMAIN_BACKEND + '/api/add'
+                    var data = {
+                        'author': $('#author').val() || '???',
+                        'content': content || '???'
+                    }
+                    $.get(url, data)
+                }, DELAY)
+            }
+
+            function sendReset() {
+                var url = DOMAIN_BACKEND + '/api/reset'
+                $.get(url)
+                $('#reset-span').hide();
+                $('#reset-btn').show();
+            }
+            
+            function tryReset() {
+                $('#reset-span').show();
+                $('#reset-btn').hide();
+            }
+
+            function cancelReset() {
+                $('#reset-span').hide();
+                $('#reset-btn').show();
+            }
+
+            function copyToClipboard(text) {
+                var sampleTextarea = document.createElement("textarea");
+                document.body.appendChild(sampleTextarea);
+                sampleTextarea.value = text; //save main text in it
+                sampleTextarea.select(); //select textarea contenrs
+                document.execCommand("copy");
+                document.body.removeChild(sampleTextarea);
+            }
+
+            function copyUrl() {
+                copyToClipboard($('#url').val());
+            }
+
+            function clickBack() {
+                window.location.href = 'index.html'
+            }
+
+            $(document).on('keypress', function(e) {
+                if(e.which == 13 && VID != '') {
+                    sendData()
+                }
+            });
+            
+            $(() => {
+                if (VID == '') {
+                    $('#setup-box').show()
+                } else {
+                    setInterval(getData, POLL)
+                    $('#chat-box').show()
+                    if (CONSOLE == "1") {
+                        var url = 'index.html?vid=' + VID + '&limit=' + LIMIT + '&size=' + SIZE + '&poll=' + POLL
+                        $('#url').val(DOMAIN_FRONTEND + '/' + url)
+                        $('#console-box').show()
+                    }
+                }
+            })
+
         </script>
-        <style>
-            body { background-color: antiquewhite; }
-        </style>
     </head>
     <body>
-        VID <input id="vid"> <br>
-        LIMIT <input id="limit" value="20"> <br>
-        POLL <input id="poll" value="500"> <br>
-        SIZE <input id="size" value="24"> <br>
-        DELAY <input id="delay" value="3000"> <br>
-        <button onclick="getStart()">Submit</button>
-        <!-- <a href="backstage.html?vid=qAf7LO_Ve7E&limit=20&size=24&poll=500">Backstage</a> <br>
-        <a href="chatroom.html?vid=qAf7LO_Ve7E&limit=20&size=24&poll=500">Chatroom</a> <br>
-        <span>?vid=qAf7LO_Ve7E&limit=20&size=24&poll=500</span> <br> -->
+
+        <div id="setup-box" style="display:none">
+            VID <input id="vid"> <br>
+            LIMIT <input id="limit" value="20"> <br>
+            POLL <input id="poll" value="1000"> <br>
+            SIZE <input id="size" value="24"> <br>
+            DELAY <input id="delay" value="3000"> <br>
+            CONSOLE <input id="console" value="1"> <br>
+            <button onclick="getStart()">Submit</button>
+        </div>
+
+        <div id="console-box" style="display:none">
+            <button onclick="clickBack()">Back</button> 
+            <input id="url" disabled> 
+            <button onclick="copyUrl()">Copy</button> 
+            <br>
+            Author <input id="author" value="亞可"> 
+            <br>
+            Content <input id="content" value="好可愛哦~"> 
+            <button onclick="sendData()">Send</button> 
+            <br>
+            <button id='reset-btn' onclick="tryReset()">Reset</button> 
+            <span id="reset-span" style="display: none;">
+                Confirm Reset? 
+                <button onclick="sendReset()">Yes</button> 
+                <button onclick="cancelReset()">No</button> 
+            </span>
+        </div>
+
+        <div id="chat-box" style="display:none">
+            <!-- empty -->
+        </div>
+
     </body>
 </html>
