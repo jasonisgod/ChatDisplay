@@ -1,0 +1,24 @@
+
+:root {
+    --SIZE: 30px;
+}
+body { background-color: antiquewhite; }
+#console-box { background-color: antiquewhite; margin: auto; padding: 10px; border: 1px solid gray; }
+#chat-box { bottom: 0; overflow-y: auto; position: absolute; margin: auto; z-index: -1; width: 100%; }
+#reset-btn, #reset-span { color: red; }
+.author {
+    color:blue; font-weight: bold; font-size: var(--SIZE);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 500px;
+    display: inline-block;
+    margin-bottom: -5px;
+}
+.text { font-size: var(--SIZE); }
+.emoji { width: var(--SIZE); }
+.comment { margin-bottom: 1px; }
+.comment-private { color:red; background-color: pink; text-align: right; padding-right: 20px; }
+.author-private { color:red; }
+.text-private { color:red; }
+/* .emoji-private { color:gray; } */
