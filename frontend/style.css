@@ -4,6 +4,7 @@
 
 body {
     background-color: antiquewhite;
+    overflow-x: hidden;
 }
 
 #console-box {
