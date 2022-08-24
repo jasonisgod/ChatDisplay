@@ -5,6 +5,7 @@
 body {
     background-color: antiquewhite;
     overflow-x: hidden;
+    overflow-y: hidden;
 }
 
 #console-box {
@@ -12,6 +13,9 @@ body {
     margin: auto;
     padding: 10px;
     border: 1px solid gray;
+    position: absolute;
+    right: 10px;
+    z-index: 1;
 }
 
 #chat-box {
@@ -19,7 +23,7 @@ body {
     overflow-y: auto;
     position: absolute;
     margin: auto;
-    z-index: -1;
+    /* z-index: -1; */
     width: 100%;
 }
 
@@ -31,13 +35,18 @@ body {
 .author {
     color: blue;
     font-weight: bold;
-    font-size: var(--SIZE);
+    font-size: calc(var(--SIZE) / 2);
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    max-width: 500px;
+    max-width: 200px;
     display: inline-block;
     margin-bottom: -5px;
+    margin-left: calc(var(--SIZE) / 2);
+}
+
+.author-private {
+    color: red;
 }
 
 .text {
@@ -54,13 +63,22 @@ body {
 
 .comment-private {
     color: red;
-    background-color: pink;
+    /* background-color: pink; */
     text-align: right;
     padding-right: 20px;
 }
 
-.author-private {
-    color: red;
+.content {
+    margin: 5px;
+    padding: 10px calc(var(--SIZE) / 2);
+    background-color: lightgray;
+    border-radius: calc(var(--SIZE) / 2);
+    width: fit-content;
+    max-width: 75%;
+}
+
+.content-private {
+    margin-left: auto;
 }
 
 .text-private {

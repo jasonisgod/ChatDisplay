@@ -20,12 +20,15 @@ function commentsToHtml(comments) {
         var type_ = comment.type
         var tmp = ''
         tmp += `<div class="author author-${type_}">${comment.author}</div> `
+        tmp += `<br>`
+        tmp += `<div class="content content-${type_}">`
         comment.content.forEach(e => {
             if (e.type == 'text')
             tmp += `<span class="text text-${type_}">${e.data}</span>`
             if (e.type == 'emoji')
             tmp += `<img class="emoji emoji-${type_}" src=${e.url}>`
         })
+        tmp += `</div>`
         tmp = `<div class="comment comment-${type_}">` + tmp + '</div>'
         html += tmp
     })
