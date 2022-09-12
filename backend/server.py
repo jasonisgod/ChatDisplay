@@ -58,6 +58,33 @@ def get_yt_comments(vid, limit=30):
     except Exception as e:
         return [] #'Error'
 
+def get_bi_comments(vid, limit=30):
+    try:
+        url = 'https://api.live.bilibili.com/xlive/web-room/v1/dM/gethistory?roomid=' + vid
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'}
+        response = requests.get(url, headers=headers)
+        json_obj = response.json()
+        actions = json_obj['data']['room']
+        comments = []
+        for action in actions:
+            try:
+                author = action['nickname']
+                timestamp = action['check_info']['ts']
+                timestamp = e2t(int(timestamp))
+                data = action['text']
+                content = [{'type':'text','data':data}]
+                comment = new_comment(timestamp, author, content, 'public')
+                comments += [comment]
+            except Exception as e:
+                # raise e
+                pass
+        if len(comments) > limit:
+            comments = comments[-limit:]
+        return comments
+    except Exception as e:
+        raise e
+        return [] #'Error'
+
 def add_jm_comments(author, content, type_):
     comment = new_comment(now(), author, [{'type':'text','data':content}], type_)
     jm_comments.append(comment)
@@ -74,7 +101,8 @@ def api_data():
     limit = int(request.args.get('limit'))
     console = request.args.get('console')
     yt_comments = get_yt_comments(vid, limit)
-    comments = (yt_comments + jm_comments)
+    bi_comments = get_bi_comments(vid, limit)
+    comments = (yt_comments + bi_comments + jm_comments)
     if console == '0':
         comments = [c for c in comments if c['type'] == 'public']
     comments = sorted(comments, key=lambda c: c['timestamp'])
